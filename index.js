@@ -4,8 +4,8 @@ const axios = require('axios');
 const app = express();
 app.use(express.json({ limit:limit '10mb'}));
 
-const TELEGRAM_TOKEN = "7198653278:AAH-E6YuK_qkUWFd60sp0lY6WVt2GZe6nCo";  // ← your token
-const CHAT_ID = "-1002135229307";  // PumpPill group
+const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
+const CHAT_ID = process.env.CHAT_ID;
 
 let cache = {};  // simple in-memory cache
 
