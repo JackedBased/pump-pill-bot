@@ -11,17 +11,17 @@ const CHAT_ID = process.env.CHAT_ID;
 let lastSig = null;
 let cache = {};
 
-async function poll() {
+async function pollSwaps() {
   try {
-    // Poll Raydium program for latest SWAP signatures
-    const sigResp = await axios.post(QUICKNODE, {
+    // Poll Raydium program for last 30 signatures (main SWAP source)
+    const resp = await axios.post(QUICKNODE, {
       jsonrpc: "2.0",
       id: 1,
       method: "getSignaturesForAddress",
       params: ["675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8", { limit: 30 }]
     });
 
-    const sigs = sigResp.data.result || [];
+    const sigs = resp.data.result || [];
     if (sigs.length === 0) return;
     if (!lastSig) {
       lastSig = sigs[0].signature;
@@ -71,12 +71,14 @@ async function poll() {
       if (drop < 20) continue;
 
       const totalSold = transfers.reduce((s, t) => s + parseFloat(t.tokenAmount), 0).toFixed(0);
+      const wallets = transfers.map(t => t.fromUserAccount.slice(0,10) + '...').join(', '));
 
       const text = `WHALE DUMP DETECTED 🐋
 
 ${symbol} • $${(mc/1000000).toFixed(2)}M MC
--${drop.toFixed(1)}% drop
+-${drop.toFixed(1)}% in 30 min
 ${transfers.length} whale(s) dumped ${totalSold} tokens
+Wallets: ${wallets}
 https://dexscreener.com/solana/${mint}`;
 
       await axios.post(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
@@ -91,9 +93,9 @@ https://dexscreener.com/solana/${mint}`;
   }
 }
 
-setInterval(poll, 25000); // every 25 seconds (safe for free tier)
-poll();
+setInterval(pollSwaps, 25000); // every 25 seconds
+pollSwaps();
 
-app.get('/', (req, res) => res.send('PumpPill QuickNode Bot Running'));
+app.get('/', (req, res) => res.send('PumpPill QuickNode Polling Bot Running'));
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log('Bot polling QuickNode every 25s'));
+app.listen(port, () => console.log('Bot polling every 25s'));
