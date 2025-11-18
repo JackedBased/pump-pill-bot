@@ -2,7 +2,7 @@
 const express = require('express');
 const axios = require('axios');
 const app = express();
-app.use(express.json({ limit:limit '10mb'}));
+app.use(express.json({ limit: '10mb' }));
 
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
